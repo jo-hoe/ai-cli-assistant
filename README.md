@@ -53,4 +53,4 @@ Execute the program by running
 
 I currently pay ~0.01 cent for 20 commands.
 Although your results may vary, there is a max [token](https://platform.openai.com/tokenizer) limit (256) set in the tool to ensure you do not overspend.
-In addition you can set monthly max spending limits in the [OpenAI website](https://platform.openai.com/account/rate-limits).
+In addition you can set monthly max spending limits in the [OpenAI website](https://platform.openai.com/account/billing/limits).
