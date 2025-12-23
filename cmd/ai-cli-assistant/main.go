@@ -7,6 +7,8 @@ import (
 
 	"github.com/jo-hoe/ai-cli-assistant/internal/app"
 	"github.com/jo-hoe/ai-cli-assistant/internal/openai"
+	"github.com/jo-hoe/ai-cli-assistant/internal/config"
+	"github.com/jo-hoe/ai-cli-assistant/internal/aiclient"
 )
 
 func main() {
@@ -16,7 +18,16 @@ func main() {
 		return
 	}
 
-	result, err := app.Run(os.Args[1:], openai.NewOpenAIClient(apiKey, 256, &http.Client{}))
+	cfg, _ := config.Load("")
+	var client aiclient.AIClient
+	switch cfg.Backend {
+	case "openai":
+		client = openai.NewOpenAIClient(apiKey, cfg.MaxTokens, &http.Client{}, cfg.OpenAI.Endpoint, cfg.OpenAI.Model)
+	default:
+		fmt.Printf("unsupported backend: %s", cfg.Backend)
+		return
+	}
+	result, err := app.Run(os.Args[1:], client, cfg.CLIKind, cfg.Prompt)
 	if err != nil {
 		fmt.Printf("error encountered: %s", err)
 	} else {

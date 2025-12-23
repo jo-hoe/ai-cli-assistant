@@ -22,7 +22,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: sampleResponse,
-			})),
+			}), "", ""),
 			args:    args{prompt: "test"},
 			want:    "\n\nThis is a test!",
 			wantErr: false,
@@ -32,7 +32,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 500,
 				ResponseBody: sampleResponse,
-			})),
+			}), "", ""),
 			args:    args{prompt: "test"},
 			want:    "",
 			wantErr: true,
@@ -42,7 +42,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: "unexpected",
-			})),
+			}), "", ""),
 			args:    args{prompt: "test"},
 			want:    "",
 			wantErr: true,

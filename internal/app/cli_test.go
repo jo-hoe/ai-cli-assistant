@@ -22,10 +22,10 @@ func Test_Run(t *testing.T) {
 		{
 			name: "positive test",
 			args: args{
-				aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
-					ResponseCode: 200,
-					ResponseBody: sampleResponse,
-				})),
+			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+				ResponseCode: 200,
+				ResponseBody: sampleResponse,
+			}), "", ""),
 				cliArgs: []string{"do", "x"},
 			},
 			want:    "\n\nThis is a test!",
@@ -34,10 +34,10 @@ func Test_Run(t *testing.T) {
 		{
 			name: "open ai error",
 			args: args{
-				aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
-					ResponseCode: 500,
-					ResponseBody: "dummy",
-				})),
+			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+				ResponseCode: 500,
+				ResponseBody: "dummy",
+			}), "", ""),
 				cliArgs: []string{"do", "x"},
 			},
 			want:    "",
@@ -46,10 +46,10 @@ func Test_Run(t *testing.T) {
 		{
 			name: "missing argument",
 			args: args{
-				aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
-					ResponseCode: 200,
-					ResponseBody: sampleResponse,
-				})),
+			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+				ResponseCode: 200,
+				ResponseBody: sampleResponse,
+			}), "", ""),
 				cliArgs: []string{""},
 			},
 			want:    "",
@@ -58,7 +58,7 @@ func Test_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Run(tt.args.cliArgs, tt.args.aiClient)
+			got, err := Run(tt.args.cliArgs, tt.args.aiClient, "cli", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
 				return

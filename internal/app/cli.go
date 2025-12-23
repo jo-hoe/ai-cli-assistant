@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/jo-hoe/ai-cli-assistant/internal/aiclient"
@@ -16,8 +15,7 @@ Command: <example command>
 Description: <step by step description of the command>`
 
 // Run executes the CLI logic using the provided AI client.
-func Run(args []string, aiClient aiclient.AIClient) (string, error) {
-	cliKind := os.Getenv("CLI_KIND")
+func Run(args []string, aiClient aiclient.AIClient, cliKind string, promptTemplate string) (string, error) {
 	if cliKind == "" {
 		cliKind = "cli"
 	}
@@ -27,5 +25,9 @@ func Run(args []string, aiClient aiclient.AIClient) (string, error) {
 		return "", errors.New("please define an action to invoke the program")
 	}
 
-	return aiClient.GetAnswer(fmt.Sprintf(prompt, cliKind, action))
+	tmpl := promptTemplate
+	if tmpl == "" {
+		tmpl = prompt
+	}
+	return aiClient.GetAnswer(fmt.Sprintf(tmpl, cliKind, action))
 }

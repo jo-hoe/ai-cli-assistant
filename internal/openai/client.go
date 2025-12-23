@@ -8,27 +8,37 @@ import (
 	"net/http"
 )
 
-const endpoint = "https://api.openai.com/v1/chat/completions"
-const model = "gpt-3.5-turbo"
+const defaultEndpoint = "https://api.openai.com/v1/chat/completions"
+const defaultModel = "gpt-3.5-turbo"
 
 type OpenAIClient struct {
 	apiKey     string
 	maxTokens  int
 	httpClient *http.Client
+	endpoint   string
+	model      string
 }
 
-func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client) *OpenAIClient {
+func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client, endpoint string, model string) *OpenAIClient {
+	if endpoint == "" {
+		endpoint = defaultEndpoint
+	}
+	if model == "" {
+		model = defaultModel
+	}
 	return &OpenAIClient{
 		apiKey:     apiKey,
 		maxTokens:  maxTokens,
 		httpClient: client,
+		endpoint:   endpoint,
+		model:      model,
 	}
 }
 
 func (aiClient *OpenAIClient) GetAnswer(prompt string) (string, error) {
 	data := Request{
 		Messages:  []Message{{Role: "user", Content: prompt}},
-		Model:     model,
+		Model:     aiClient.model,
 		MaxTokens: aiClient.maxTokens,
 	}
 
@@ -37,7 +47,7 @@ func (aiClient *OpenAIClient) GetAnswer(prompt string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", aiClient.endpoint, bytes.NewBuffer(payload))
 	if err != nil {
 		return "", err
 	}
