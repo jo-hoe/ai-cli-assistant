@@ -16,36 +16,34 @@ Command: <example command>
 Description: <step by step description of the command>`
 
 type OpenAIConfig struct {
-	Endpoint string `yaml:"endpoint"`
-	Model    string `yaml:"model"`
+	Enabled   bool   `yaml:"enabled"`
+	Endpoint  string `yaml:"endpoint"`
+	Model     string `yaml:"model"`
+	MaxTokens int    `yaml:"maxTokens"`
 }
 
 // Config holds non-secret runtime configuration in YAML.
 // Secrets like API keys should continue to be provided via environment variables.
 type Config struct {
-	// Backend selects the AI provider ("openai", etc.). Defaults to "openai".
-	Backend string `yaml:"backend"`
 	// CLIKind influences wording (e.g., "bash", "powershell", "kubectl")
 	CLIKind string `yaml:"cliKind"`
 	// Prompt is the template used to generate the request to the AI backend.
 	// Supports %s for CLI kind and action insertion.
 	Prompt string `yaml:"prompt"`
-	// MaxTokens limits model output tokens
-	MaxTokens int `yaml:"maxTokens"`
-	// OpenAI specific configuration (used when Backend == "openai")
+	// OpenAI specific configuration
 	OpenAI OpenAIConfig `yaml:"openai"`
 }
 
 // Default returns sane defaults.
 func Default() Config {
 	return Config{
-		Backend:  "openai",
-		CLIKind:  "cli",
-		Prompt:   DefaultPrompt,
-		MaxTokens: 256,
+		CLIKind: "cli",
+		Prompt:  DefaultPrompt,
 		OpenAI: OpenAIConfig{
-			Endpoint: "",
-			Model:    "",
+			Enabled:   true,
+			Endpoint:  "",
+			Model:     "",
+			MaxTokens: 256,
 		},
 	}
 }
@@ -79,23 +77,22 @@ func Load(path string) (Config, error) {
 	}
 
 	// Overlay defaults with file values (only override when provided)
-	if fileCfg.Backend != "" {
-		cfg.Backend = fileCfg.Backend
-	}
 	if fileCfg.CLIKind != "" {
 		cfg.CLIKind = fileCfg.CLIKind
 	}
 	if fileCfg.Prompt != "" {
 		cfg.Prompt = fileCfg.Prompt
 	}
-	if fileCfg.MaxTokens > 0 {
-		cfg.MaxTokens = fileCfg.MaxTokens
-	}
+	// OpenAI config: merge settings
+	cfg.OpenAI.Enabled = fileCfg.OpenAI.Enabled
 	if fileCfg.OpenAI.Endpoint != "" {
 		cfg.OpenAI.Endpoint = fileCfg.OpenAI.Endpoint
 	}
 	if fileCfg.OpenAI.Model != "" {
 		cfg.OpenAI.Model = fileCfg.OpenAI.Model
+	}
+	if fileCfg.OpenAI.MaxTokens > 0 {
+		cfg.OpenAI.MaxTokens = fileCfg.OpenAI.MaxTokens
 	}
 	return cfg, nil
 }

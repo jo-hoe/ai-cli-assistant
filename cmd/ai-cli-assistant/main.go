@@ -20,11 +20,12 @@ func main() {
 
 	cfg, _ := config.Load("")
 	var client aiclient.AIClient
-	switch cfg.Backend {
-	case "openai":
-		client = openai.NewOpenAIClient(apiKey, cfg.MaxTokens, &http.Client{}, cfg.OpenAI.Endpoint, cfg.OpenAI.Model)
-	default:
-		fmt.Printf("unsupported backend: %s", cfg.Backend)
+	
+	// Check which backend is enabled
+	if cfg.OpenAI.Enabled {
+		client = openai.NewOpenAIClient(apiKey, cfg.OpenAI.MaxTokens, &http.Client{}, cfg.OpenAI.Endpoint, cfg.OpenAI.Model)
+	} else {
+		fmt.Print("No AI backend is enabled in configuration")
 		return
 	}
 	result, err := app.Run(os.Args[1:], client, cfg.CLIKind, cfg.Prompt)

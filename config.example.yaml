@@ -1,9 +1,6 @@
 # Example configuration for ai-cli-assistant (YAML)
 # Non-secret settings are defined here. Secrets must come from environment variables.
 
-# Select the AI backend provider. Currently supported: "openai"
-backend: openai
-
 # Influences wording (e.g., "bash", "powershell", "kubectl")
 cliKind: cli
 
@@ -17,14 +14,15 @@ cliKind: cli
 #
 #   Description: <step by step description of the command>
 
-# Maximum number of tokens for the response
-maxTokens: 256
-
-# OpenAI backend-specific configuration
+# OpenAI backend configuration
 openai:
+  # Enable or disable the OpenAI backend
+  enabled: true
   # Optional: override the default endpoint (e.g., to route via a local proxy)
   # Leave empty to use the default: https://api.openai.com/v1/chat/completions
   endpoint: ""
   # Optional: override the default model (e.g., "gpt-4o-mini", "gpt-3.5-turbo")
   # Leave empty to use the default model.
   model: ""
+  # Maximum number of tokens for the response
+  maxTokens: 256
