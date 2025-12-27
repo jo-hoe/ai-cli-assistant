@@ -17,13 +17,14 @@ Description: <step by step description of the command>`
 
 type OpenAIConfig struct {
 	Enabled   bool   `yaml:"enabled"`
+	APIKey    string `yaml:"apiKey"`
 	Endpoint  string `yaml:"endpoint"`
 	Model     string `yaml:"model"`
 	MaxTokens int    `yaml:"maxTokens"`
 }
 
-// Config holds non-secret runtime configuration in YAML.
-// Secrets like API keys should continue to be provided via environment variables.
+// Config holds runtime configuration in YAML.
+// API keys can be provided via config file or environment variables (env var takes precedence).
 type Config struct {
 	// CLIKind influences wording (e.g., "bash", "powershell", "kubectl")
 	CLIKind string `yaml:"cliKind"`
@@ -41,6 +42,7 @@ func Default() Config {
 		Prompt:  DefaultPrompt,
 		OpenAI: OpenAIConfig{
 			Enabled:   true,
+			APIKey:    "",
 			Endpoint:  "",
 			Model:     "",
 			MaxTokens: 256,
@@ -85,6 +87,9 @@ func Load(path string) (Config, error) {
 	}
 	// OpenAI config: merge settings
 	cfg.OpenAI.Enabled = fileCfg.OpenAI.Enabled
+	if fileCfg.OpenAI.APIKey != "" {
+		cfg.OpenAI.APIKey = fileCfg.OpenAI.APIKey
+	}
 	if fileCfg.OpenAI.Endpoint != "" {
 		cfg.OpenAI.Endpoint = fileCfg.OpenAI.Endpoint
 	}

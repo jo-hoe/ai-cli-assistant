@@ -1,5 +1,6 @@
 # Example configuration for ai-cli-assistant (YAML)
-# Non-secret settings are defined here. Secrets must come from environment variables.
+# Both settings and secrets (like API keys) can be defined here.
+# Note: Environment variables take precedence over config file values.
 
 # Influences wording (e.g., "bash", "powershell", "kubectl")
 cliKind: cli
@@ -18,6 +19,10 @@ cliKind: cli
 openai:
   # Enable or disable the OpenAI backend
   enabled: true
+  # API Key for OpenAI (alternative to OPENAI_API_KEY environment variable)
+  # Environment variable takes precedence if both are set
+  # Example: apiKey: "sk-..."
+  apiKey: ""
   # Optional: override the default endpoint (e.g., to route via a local proxy)
   # Leave empty to use the default: https://api.openai.com/v1/chat/completions
   endpoint: ""

@@ -24,13 +24,19 @@ func main() {
 	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to config file (shorthand)")
 	flag.Parse()
 
+	cfg, _ := config.Load(configPath)
+	
+	// Get API key from environment variable or config file (env var takes precedence)
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
-		fmt.Print("Please set the open ai key as environment variable ('OPENAI_API_KEY')")
+		apiKey = cfg.OpenAI.APIKey
+	}
+	
+	if apiKey == "" {
+		fmt.Print("Please set the OpenAI API key either:\n- As environment variable 'OPENAI_API_KEY'\n- In config file under 'openai.apiKey'")
 		return
 	}
 
-	cfg, _ := config.Load(configPath)
 	var client aiclient.AIClient
 	
 	// Check which backend is enabled
