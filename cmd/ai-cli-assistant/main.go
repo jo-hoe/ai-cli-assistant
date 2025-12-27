@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/jo-hoe/ai-cli-assistant/internal/app"
 	"github.com/jo-hoe/ai-cli-assistant/internal/openai"
@@ -12,13 +14,23 @@ import (
 )
 
 func main() {
+	// Get default config path in user's home directory
+	homeDir, _ := os.UserHomeDir()
+	defaultConfigPath := filepath.Join(homeDir, ".ai-cli-assistant", "config.yaml")
+	
+	// Define command-line flags
+	var configPath string
+	flag.StringVar(&configPath, "config", defaultConfigPath, "Path to config file")
+	flag.StringVar(&configPath, "c", defaultConfigPath, "Path to config file (shorthand)")
+	flag.Parse()
+
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		fmt.Print("Please set the open ai key as environment variable ('OPENAI_API_KEY')")
 		return
 	}
 
-	cfg, _ := config.Load("")
+	cfg, _ := config.Load(configPath)
 	var client aiclient.AIClient
 	
 	// Check which backend is enabled
@@ -28,7 +40,7 @@ func main() {
 		fmt.Print("No AI backend is enabled in configuration")
 		return
 	}
-	result, err := app.Run(os.Args[1:], client, cfg.CLIKind, cfg.Prompt)
+	result, err := app.Run(flag.Args(), client, cfg.CLIKind, cfg.Prompt)
 	if err != nil {
 		fmt.Printf("error encountered: %s", err)
 	} else {
