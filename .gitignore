@@ -23,4 +23,5 @@ config.yaml
 go.work
 
 .env
-.vscode/
+.vscode/*
+!.vscode/launch.json
