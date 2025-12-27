@@ -59,7 +59,9 @@ func (aiClient *OpenAIClient) GetAnswer(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("received response code %d", resp.StatusCode)
