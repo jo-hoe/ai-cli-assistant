@@ -26,22 +26,16 @@ func main() {
 
 	cfg, _ := config.Load(configPath)
 	
-	// Get API key from environment variable or config file (env var takes precedence)
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	if apiKey == "" {
-		apiKey = cfg.OpenAI.APIKey
-	}
-	
-	if apiKey == "" {
-		fmt.Print("Please set the OpenAI API key either:\n- As environment variable 'OPENAI_API_KEY'\n- In config file under 'openai.apiKey'")
-		return
-	}
-
 	var client aiclient.AIClient
 	
 	// Check which backend is enabled
 	if cfg.OpenAI.Enabled {
-		client = openai.NewOpenAIClient(apiKey, cfg.OpenAI.MaxTokens, &http.Client{}, cfg.OpenAI.Endpoint, cfg.OpenAI.Model)
+		openaiClient, err := openai.NewOpenAIClient(cfg.OpenAI.APIKey, cfg.OpenAI.MaxTokens, &http.Client{}, cfg.OpenAI.Endpoint, cfg.OpenAI.Model)
+		if err != nil {
+			fmt.Print(err.Error())
+			return
+		}
+		client = openaiClient
 	} else {
 		fmt.Print("No AI backend is enabled in configuration")
 		return

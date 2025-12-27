@@ -1,6 +1,8 @@
 package app
 
 import (
+	"net/http"
+	"os"
 	"testing"
 
 	"github.com/jo-hoe/ai-cli-assistant/internal/aiclient"
@@ -9,6 +11,10 @@ import (
 )
 
 func Test_Run(t *testing.T) {
+	// Set test API key to avoid errors during client creation
+	os.Setenv("OPENAI_API_KEY", "test-key")
+	defer os.Unsetenv("OPENAI_API_KEY")
+	
 	type args struct {
 		aiClient aiclient.AIClient
 		cliArgs  []string
@@ -22,7 +28,7 @@ func Test_Run(t *testing.T) {
 		{
 			name: "positive test",
 			args: args{
-			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateOpenAIClient(t, "dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: sampleResponse,
 			}), "", ""),
@@ -34,7 +40,7 @@ func Test_Run(t *testing.T) {
 		{
 			name: "open ai error",
 			args: args{
-			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateOpenAIClient(t, "dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 500,
 				ResponseBody: "dummy",
 			}), "", ""),
@@ -46,7 +52,7 @@ func Test_Run(t *testing.T) {
 		{
 			name: "missing argument",
 			args: args{
-			aiClient: openai.NewOpenAIClient("dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateOpenAIClient(t, "dummy", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: sampleResponse,
 			}), "", ""),
@@ -68,6 +74,16 @@ func Test_Run(t *testing.T) {
 			}
 		})
 	}
+}
+
+// mustCreateOpenAIClient is a helper that creates a client or fails the test
+func mustCreateOpenAIClient(t *testing.T, apiKey string, maxTokens int, client *http.Client, endpoint string, model string) aiclient.AIClient {
+	t.Helper()
+	c, err := openai.NewOpenAIClient(apiKey, maxTokens, client, endpoint, model)
+	if err != nil {
+		t.Fatalf("Failed to create OpenAI client: %v", err)
+	}
+	return c
 }
 
 const sampleResponse = `{

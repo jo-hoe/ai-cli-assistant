@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 const defaultEndpoint = "https://api.openai.com/v1/chat/completions"
@@ -19,7 +20,17 @@ type OpenAIClient struct {
 	model      string
 }
 
-func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client, endpoint string, model string) *OpenAIClient {
+func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client, endpoint string, model string) (*OpenAIClient, error) {
+	// Get API key from environment variable or use provided value (env var takes precedence)
+	finalAPIKey := os.Getenv("OPENAI_API_KEY")
+	if finalAPIKey == "" {
+		finalAPIKey = apiKey
+	}
+	
+	if finalAPIKey == "" {
+		return nil, fmt.Errorf("OpenAI API key is required. Please set it either:\n- As environment variable 'OPENAI_API_KEY'\n- In config file under 'openai.apiKey'")
+	}
+	
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
@@ -27,12 +38,12 @@ func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client, endpoint
 		model = defaultModel
 	}
 	return &OpenAIClient{
-		apiKey:     apiKey,
+		apiKey:     finalAPIKey,
 		maxTokens:  maxTokens,
 		httpClient: client,
 		endpoint:   endpoint,
 		model:      model,
-	}
+	}, nil
 }
 
 func (aiClient *OpenAIClient) GetAnswer(prompt string) (string, error) {

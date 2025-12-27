@@ -1,6 +1,8 @@
 package openai
 
 import (
+	"net/http"
+	"os"
 	"testing"
 
 	"github.com/jo-hoe/ai-cli-assistant/internal/httpmock"
@@ -10,6 +12,10 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 	type args struct {
 		prompt string
 	}
+	// Set test API key to avoid errors during client creation
+	os.Setenv("OPENAI_API_KEY", "test-key")
+	defer os.Unsetenv("OPENAI_API_KEY")
+	
 	tests := []struct {
 		name     string
 		aiClient *OpenAIClient
@@ -19,7 +25,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 	}{
 		{
 			name: "positive test",
-			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateClient(t, "", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: sampleResponse,
 			}), "", ""),
@@ -29,7 +35,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 		},
 		{
 			name: "server failure test",
-			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateClient(t, "", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 500,
 				ResponseBody: sampleResponse,
 			}), "", ""),
@@ -39,7 +45,7 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 		},
 		{
 			name: "unexpected JSON response",
-			aiClient: NewOpenAIClient("", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
+			aiClient: mustCreateClient(t, "", 0, httpmock.CreateMockClient(httpmock.ResponseSummery{
 				ResponseCode: 200,
 				ResponseBody: "unexpected",
 			}), "", ""),
@@ -60,6 +66,16 @@ func TestOpenAIClient_GetAnswer(t *testing.T) {
 			}
 		})
 	}
+}
+
+// mustCreateClient is a helper that creates a client or fails the test
+func mustCreateClient(t *testing.T, apiKey string, maxTokens int, client *http.Client, endpoint string, model string) *OpenAIClient {
+	t.Helper()
+	c, err := NewOpenAIClient(apiKey, maxTokens, client, endpoint, model)
+	if err != nil {
+		t.Fatalf("Failed to create OpenAI client: %v", err)
+	}
+	return c
 }
 
 const sampleResponse = `{
