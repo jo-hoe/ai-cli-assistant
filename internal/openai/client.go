@@ -10,7 +10,7 @@ import (
 )
 
 const defaultEndpoint = "https://api.openai.com/v1/chat/completions"
-const defaultModel = "gpt-3.5-turbo"
+const defaultModel = "gpt-5-mini"
 
 type OpenAIClient struct {
 	apiKey     string
@@ -26,11 +26,11 @@ func NewOpenAIClient(apiKey string, maxTokens int, client *http.Client, endpoint
 	if finalAPIKey == "" {
 		finalAPIKey = apiKey
 	}
-	
+
 	if finalAPIKey == "" {
 		return nil, fmt.Errorf("OpenAI API key is required. Please set it either:\n- As environment variable 'OPENAI_API_KEY'\n- In config file under 'openai.apiKey'")
 	}
-	
+
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
